@@ -18,28 +18,41 @@ import bs4
 
 def soup_boilling(href_link):
     html_data = requests.get(href_link)
-    print(html_data.text)
+    # print(html_data.text)
     soup = bs4.BeautifulSoup(html_data.text, "html.parser")
     return soup
 
 
-# def district_scrapper(href_district):
-#
-#
-# def village_scrapper(href_village):
-#
-#
-#
-# def csv_writer(dictrict_name: str, data_villages: list, file_name: str):
+# def data_municipality_scrapper(href_village):
+
+
+# def ward_municipality_crapper
+
+
+def link_municipality_scrapper(soup):
+    links = []
+    sub_links = []
+    for index, item in enumerate(soup.find_all('td')):
+        if (index + 1) % 3 == 0:
+            sub_links.append(item.a.attrs['href'])
+            links.append(sub_links)
+            sub_links = []
+            continue
+        sub_links.append(item.text)
+    return links
+
+
+# def csv_writer(region_name: str, data_villages: list, file_name: str):
 #     with open(f'{file_name}.csv', 'w') as csv_file:
 #         csv_writer = csv_writer(csv_file, delimiter=',')
 #         csv_writer.writerows(data_villages)
 
 
 def scrap_elect(href_link, file_name):
-    soup_boilling(href_link)
-
+    soup = soup_boilling(href_link)
+    links = link_municipality_scrapper(soup)
+    print(links)
 
 
 if __name__ == '__main__':
-    scrap_elect('https://www.volby.cz/pls/ps2017nss/ps3?xjazyk=CZ', 'election_data')  # odkaz na seznam obci, nazev souboru
+    scrap_elect('https://www.volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111', 'election_data')  # odkaz na seznam obci, nazev souboru
