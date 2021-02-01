@@ -27,7 +27,8 @@ def data_municipality_scrapper(links):
     data_municipality = []
     for item in links:
         if len(item[2]) < 80:
-            print('link is not complete', item)
+            print(item)
+            ward_municipality_scrapper(item[2])
             continue
         sub_soup = soup_boilling(item[2])
         figures = [figure.text for figure in sub_soup.table.find_all('td')]
@@ -38,10 +39,19 @@ def data_municipality_scrapper(links):
         #     print(item)
         # exit()
 
-
-
-
-# def ward_municipality_scrapper
+# nektere obce maji okrsky...
+def ward_municipality_scrapper(url):
+    ward_soup = soup_boilling(url)
+    ward_links = []
+    for item in ward_soup.table.find_all('td'):
+        try:
+            ward_links.append(item.a.attrs['href'])
+        except AttributeError:
+            continue
+    print(ward_links)
+    # vytvorit linky
+    # extrahovat total data a ty pak suma secist
+    # vse vratit do data_municipality scrapper
 
 
 def link_municipality_scrapper(soup, url):
@@ -64,6 +74,7 @@ def link_municipality_scrapper(soup, url):
     return links
 
 
+# pojmenovani kraje a okresu
 def region_name(soup):
     return [item.text.strip('\n') for item in soup.find_all('h3')]
 
@@ -74,6 +85,7 @@ def region_name(soup):
 #         csv_writer.writerows(data_villages)
 
 
+# main()
 def scrap_elect(url, file_name):
     soup = soup_boilling(url)
     name = region_name(soup)
