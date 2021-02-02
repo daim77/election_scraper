@@ -35,7 +35,8 @@ def data_municipality_scrapper():
 
     for item in result_election:
         if len(item['links'][0]) < 80:
-            ward_municipality_scrapper(item['links'][0])
+            ward_links = ward_municipality_scrapper(item['links'][0])
+            item['links'].pop().append(ward_links)
             continue
 
         sub_soup = soup_boilling(item['links'][0])
@@ -55,7 +56,7 @@ def ward_municipality_scrapper(url_for_wards):
             ward_links.append(item.a.attrs['href'])
         except AttributeError:
             continue
-    # print(ward_links)
+    return ward_links
     # vytvorit linky
     # extrahovat total data a ty pak suma secist
     # vse vratit do data_municipality scrapper
@@ -74,15 +75,15 @@ def link_municipality_scrapper(soup, url):
             continue
         sub_links.append(item.text)
 
-    for item in links:
-
-        result_election_frame['city_number'] = item[0]
-        result_election_frame['city_name'] = item[1]
+    for index, item in enumerate(links):
+        # result_election.append(result_election_frame)
+        result_election.append({})
+        result_election[index]['city_number'] = item[0]
+        result_election[index]['city_name'] = item[1]
 
         url = 'https://' + '/'.join(url_part) + '/' + item[2]
-        result_election_frame['links'] = [url]
-
-        result_election.append(result_election_frame)
+        result_election[index]['links'] = [url]
+        result_election[index].update(result_election_frame)
 
 
 # region name, district name
@@ -119,6 +120,7 @@ def scrap_elect(url, file_name):
     soup = soup_boilling(url)
     region_name(soup)
     list_of_candidates()
+
     link_municipality_scrapper(soup, url)
     data_municipality_scrapper()
 
