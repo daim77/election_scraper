@@ -11,85 +11,91 @@
 # vydané obálky, platné hlasy, kandidující strany.
 # Každý řádek csv souboru potom bude speciální pro každou obec.
 
-# data structure
-# [city number, city name, link, registered, envelope, valid]
+# data structure for one municipality:
+# region, district, city_number, city_name, links,
+# registered, envelopes, valid, all_parties
 
 import csv
+from pprint import pprint as pp
 import requests
 import bs4
 
 
+result_election_frame = {}
+result_election = []
+
+
 def soup_boilling(url):
     html_data = requests.get(url)
-    # print(html_data.text)
     soup = bs4.BeautifulSoup(html_data.text, "html.parser")
     return soup
 
 
-def data_municipality_scrapper(links):
-    data_municipality = []
+def data_municipality_scrapper():
 
-    for item in links:
-        if len(item[2]) < 80:
-            print(item)
-            ward_municipality_scrapper(item[2])
+    for item in result_election:
+        if len(item['links'][0]) < 80:
+            ward_municipality_scrapper(item['links'][0])
             continue
 
-        sub_soup = soup_boilling(item[2])
+        sub_soup = soup_boilling(item['links'][0])
         figures = [figure.text for figure in sub_soup.table.find_all('td')]
 
-        item.append(figures[3])
-        item.append(figures[4])
-        item.append(figures[7])
-        data_municipality.append(item)
-
-    print(data_municipality)
-        # for item in sub_soup:
-        #     print(item)
-        # exit()
+        item['registered'] = figures[3]
+        item['envelope'] = figures[4]
+        item['valid'] = figures[7]
 
 
-# nektere obce maji okrsky...
-def ward_municipality_scrapper(url):
-    ward_soup = soup_boilling(url)
+# wards in some municipalities
+def ward_municipality_scrapper(url_for_wards):
+    ward_soup = soup_boilling(url_for_wards)
     ward_links = []
     for item in ward_soup.table.find_all('td'):
         try:
             ward_links.append(item.a.attrs['href'])
         except AttributeError:
             continue
-    print(ward_links)
+    # print(ward_links)
     # vytvorit linky
     # extrahovat total data a ty pak suma secist
     # vse vratit do data_municipality scrapper
 
 
 def link_municipality_scrapper(soup, url):
-    links = []
     sub_links = []
+    links = []
+    url_part = url.split('/')[2:][:-1]
+
     for index, item in enumerate(soup.find_all('td')):
         if (index + 1) % 3 == 0:
             sub_links.append(item.a.attrs['href'])
-            # print(item.a)
             links.append(sub_links)
             sub_links = []
             continue
         sub_links.append(item.text)
 
-    url_part = url.split('/')[2:][:-1]
     for item in links:
+
+        result_election_frame['city_number'] = item[0]
+        result_election_frame['city_name'] = item[1]
+
         url = 'https://' + '/'.join(url_part) + '/' + item[2]
-        item.pop()
-        item.append(url)
-    return links
+        result_election_frame['links'] = [url]
+
+        result_election.append(result_election_frame)
 
 
-# pojmenovani kraje a okresu
+# region name, district name
 def region_name(soup):
-    return [item.text.strip('\n') for item in soup.find_all('h3')]
+    region = [
+        item.text.strip('\n').split(':')[1]
+        for item in soup.find_all('h3')
+    ]
+    result_election_frame['region'] = region[0]
+    result_election_frame['district'] = region[1]
 
 
-# def csv_writer(region_name: str, data_villages: list, file_name: str):
+# def csv_writer(data_villages: dict, file_name: str):
 #     with open(f'{file_name}.csv', 'w') as csv_file:
 #         csv_writer = csv_writer(csv_file, delimiter=',')
 #         csv_writer.writerows(data_villages)
@@ -98,24 +104,31 @@ def region_name(soup):
 def list_of_candidates():
     soup_candidates = \
         soup_boilling('https://volby.cz/pls/ps2017nss/ps82?xjazyk=CZ')
-    print([item.text
-           for index, item in enumerate(soup_candidates.table.find_all('td'))
-           if (index + 1) % 3 == 0])
+
+    parties = [item.text
+               for index, item in
+               enumerate(soup_candidates.table.find_all('td'))
+               if (index + 1) % 3 == 0]
+
+    for member in parties:
+        result_election_frame[member] = 0
 
 
 # main()
 def scrap_elect(url, file_name):
     soup = soup_boilling(url)
-    name = region_name(soup)
-    # print(name)
-    list_of_candidates = list_of_candidates()
+    region_name(soup)
+    list_of_candidates()
+    link_municipality_scrapper(soup, url)
+    data_municipality_scrapper()
 
-    links = link_municipality_scrapper(soup, url)
-    # print(links)
+    pp(result_election)
+    exit()
 
-    data_municipality_scrapper(links)
-    # csv_writer(name, data_villages, file_name)
+    # csv_writer(data_villages, file_name)
 
 
 if __name__ == '__main__':
-    scrap_elect('https://www.volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111', 'election_data')  # odkaz na seznam obci, nazev souboru
+    scrap_elect('https://www.volby.cz/pls/ps2017nss/'
+                'ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
+                'election_data')
