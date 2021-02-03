@@ -11,6 +11,7 @@
 # registered, envelopes, valid, all_parties
 
 import csv
+from pprint import pprint as pp
 import requests
 import bs4
 
@@ -21,7 +22,7 @@ header_names = []
 
 
 def election_year(url):
-    year = int(url.split('/')[4][2:])
+    year = int(url.split('/')[4][2:].replace('nss', ''))
     return year
 
 
@@ -84,32 +85,41 @@ def list_of_candidates(url, year):
         parties = [str(100 + int(index / 12))[1:] + ':' + item.text
                    for index, item in
                    enumerate(soup_candidates.table.find_all('td'))
-                   if (index) % 12 == 0][1:]
+                   if index % 12 == 0][1:]
 
     for member in parties:
         result_election_frame[member] = 0
         header_names.append(member)
 
 
-def link_municipality_scrapper(soup, url):
+def link_municipality_scrapper(soup, url, year):
     sub_links = []
     links = []
     url_part = url.split('/')[2:][:-1]
 
-    for index, item in enumerate(soup.find_all('td')):
-        if (index + 1) % 3 == 0:
-            try:
-                sub_links.append(item.a.attrs['href'])
-            except AttributeError:
+    if year >= 2002:
+        for index, item in enumerate(
+                [field for field in soup.find_all('td') if field.text != '']):
+            if (index + 1) % 3 == 0:
+                try:
+                    sub_links.append(item.a.attrs['href'])
+                except AttributeError:
+                    continue
+                links.append(sub_links)
+                sub_links = []
                 continue
-            links.append(sub_links)
-            sub_links = []
-            continue
+            sub_links.append(item.text)
 
-        sub_links.append(item.text)
+    else:
+        print('links for 1996-98')
+        exit()
+
+    id_municipality_scrapper(links, url_part)
+
+
+def id_municipality_scrapper(links, url_part):
 
     for index, item in enumerate(links):
-        # result_election.append(result_election_frame)
         result_election.append({})
         result_election[index]['city_number'] = item[0]
         result_election[index]['city_name'] = item[1]
@@ -121,34 +131,45 @@ def link_municipality_scrapper(soup, url):
     header_names.insert(2, 'city_number')
     header_names.insert(3, 'city_name')
 
+    pp(result_election)
+    exit()
 
-def data_municipality_scrapper():
 
-    for item in result_election:
-        if len(item['links'][0]) < 80:
-            ward_links = ward_link_scrapper(item['links'][0])
-            item['links'] = ward_links
-            # continue
+def data_municipality_scrapper(year):
+    if year >= 2006:
+        for item in result_election:
+            if len(item['links'][0]) < 80:
+                ward_links = ward_link_scrapper(item['links'][0])
+                item['links'] = ward_links
+                # continue
 
-        item['registered'] = 0
-        item['envelope'] = 0
-        item['valid'] = 0
+            item['registered'] = 0
+            item['envelope'] = 0
+            item['valid'] = 0
 
-        for link in item['links']:
-            sub_soup = soup_boiling(link)
+            for link in item['links']:
+                sub_soup = soup_boiling(link)
 
-            figures = [
-                figure.text.replace(' ', '')
-                for figure in sub_soup.table.find_all('td')
-            ]
-            if len(figures) == 6:
-                corr = 3
-            else:
-                corr = 0
+                figures = [
+                    figure.text.replace(' ', '')
+                    for figure in sub_soup.table.find_all('td')
+                ]
+                if len(figures) == 6:
+                    corr = 3
+                else:
+                    corr = 0
 
-            item['registered'] += int(figures[3 - corr])
-            item['envelope'] += int(figures[4 - corr])
-            item['valid'] += int(figures[7 - corr])
+                item['registered'] += int(figures[3 - corr])
+                item['envelope'] += int(figures[4 - corr])
+                item['valid'] += int(figures[7 - corr])
+
+    elif year == 2002:
+        print('data for 2002')
+        exit()
+
+    else:
+        print('data for 1996-98')
+        exit()
 
     header_names.insert(4, 'registered')
     header_names.insert(5, 'envelope')
@@ -198,14 +219,14 @@ def scrap_elect(url, file_name):
     region_name(soup, year)
     list_of_candidates(url, year)
 
-    link_municipality_scrapper(soup, url)
-    data_municipality_scrapper()
+    link_municipality_scrapper(soup, url, year)
+    data_municipality_scrapper(year)
 
     csv_writer(file_name)
 
 
 if __name__ == '__main__':
     scrap_elect(
-        'https://volby.cz/pls/ps1996/u5311?xkraj=32&xokres=11',
-        'election_data_1996'
+        'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=2&xokres=2111',
+        'election_data_2002'
     )
