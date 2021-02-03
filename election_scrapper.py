@@ -16,13 +16,13 @@
 # registered, envelopes, valid, all_parties
 
 import csv
-from pprint import pprint as pp
 import requests
 import bs4
 
 
 result_election_frame = {}
 result_election = []
+header_names = []
 
 
 def soup_boilling(url):
@@ -35,29 +35,48 @@ def data_municipality_scrapper():
 
     for item in result_election:
         if len(item['links'][0]) < 80:
-            ward_links = ward_municipality_scrapper(item['links'][0])
-            item['links'].pop().append(ward_links)
-            continue
+            ward_links = ward_link_scrapper(item['links'][0])
+            item['links'] = ward_links
+            # continue
 
-        sub_soup = soup_boilling(item['links'][0])
-        figures = [figure.text for figure in sub_soup.table.find_all('td')]
+        item['registered'] = 0
+        item['envelope'] = 0
+        item['valid'] = 0
 
-        item['registered'] = figures[3]
-        item['envelope'] = figures[4]
-        item['valid'] = figures[7]
+        for link in item['links']:
+            sub_soup = soup_boilling(link)
+
+            figures = [
+                figure.text.replace(' ', '')
+                for figure in sub_soup.table.find_all('td')
+            ]
+            if len(figures) == 6:
+                corr = 3
+            else:
+                corr = 0
+
+            item['registered'] += int(figures[3 - corr])
+            item['envelope'] += int(figures[4 - corr])
+            item['valid'] += int(figures[7 - corr])
+
+    header_names.insert(4, 'registered')
+    header_names.insert(5, 'envelope')
+    header_names.insert(6, 'valid')
 
 
 # wards in some municipalities
-def ward_municipality_scrapper(url_for_wards):
+def ward_link_scrapper(url_for_wards):
     ward_soup = soup_boilling(url_for_wards)
+    url_part = url_for_wards.split('/')[2:][:-1]
     ward_links = []
     for item in ward_soup.table.find_all('td'):
         try:
-            ward_links.append(item.a.attrs['href'])
+            ward_links.append(
+                'https://' + '/'.join(url_part) + '/' + item.a.attrs['href']
+            )
         except AttributeError:
             continue
     return ward_links
-    # vytvorit linky
     # extrahovat total data a ty pak suma secist
     # vse vratit do data_municipality scrapper
 
@@ -85,6 +104,9 @@ def link_municipality_scrapper(soup, url):
         result_election[index]['links'] = [url]
         result_election[index].update(result_election_frame)
 
+    header_names.insert(2, 'city_number')
+    header_names.insert(3, 'city_name')
+
 
 # region name, district name
 def region_name(soup):
@@ -95,11 +117,8 @@ def region_name(soup):
     result_election_frame['region'] = region[0]
     result_election_frame['district'] = region[1]
 
-
-# def csv_writer(data_villages: dict, file_name: str):
-#     with open(f'{file_name}.csv', 'w') as csv_file:
-#         csv_writer = csv_writer(csv_file, delimiter=',')
-#         csv_writer.writerows(data_villages)
+    header_names.append('region')
+    header_names.append('district')
 
 
 def list_of_candidates():
@@ -113,6 +132,26 @@ def list_of_candidates():
 
     for member in parties:
         result_election_frame[member] = 0
+        header_names.append(member)
+
+
+def csv_writer(file_name):
+    file_name += '.csv'
+    try:
+        with open(file_name, mode='w', encoding='utf-8') as csv_file:
+
+            writer = csv.DictWriter(
+                csv_file,
+                delimiter=',',
+                fieldnames=header_names,
+                extrasaction='ignore'
+            )
+
+            writer.writeheader()
+            for row in result_election:
+                writer.writerow(row)
+    except IOError:
+        print("I/O error")
 
 
 # main()
@@ -124,13 +163,10 @@ def scrap_elect(url, file_name):
     link_municipality_scrapper(soup, url)
     data_municipality_scrapper()
 
-    pp(result_election)
-    exit()
-
-    # csv_writer(data_villages, file_name)
+    csv_writer(file_name)
 
 
 if __name__ == '__main__':
     scrap_elect('https://www.volby.cz/pls/ps2017nss/'
                 'ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
-                'election_data')
+                'election_data_2017')
