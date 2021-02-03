@@ -25,10 +25,40 @@ result_election = []
 header_names = []
 
 
-def soup_boilling(url):
+def election_year(url):
+    year = int(url.split('/')[4][2:])
+    return year
+
+
+def soup_boiling(url):
     html_data = requests.get(url)
     soup = bs4.BeautifulSoup(html_data.text, "html.parser")
     return soup
+
+
+# region name, district name
+def region_name(soup, year):
+    if year >= 2006:
+        region = [
+            item.text.strip('\n').split(':')[1]
+            for item in soup.find_all('h3')
+        ]
+    elif year == 2002:
+        region = [
+            item.text.replace(' ', '').split(':')[1]
+            for item in soup.find_all('b')
+        ]
+    else:
+        region = [
+            item.text.split(' ')[1]
+            for item in soup.find_all('b')[1:]
+        ]
+
+    result_election_frame['region'] = region[0]
+    result_election_frame['district'] = region[1]
+
+    header_names.append('region')
+    header_names.append('district')
 
 
 def data_municipality_scrapper():
@@ -44,7 +74,7 @@ def data_municipality_scrapper():
         item['valid'] = 0
 
         for link in item['links']:
-            sub_soup = soup_boilling(link)
+            sub_soup = soup_boiling(link)
 
             figures = [
                 figure.text.replace(' ', '')
@@ -66,7 +96,7 @@ def data_municipality_scrapper():
 
 # wards in some municipalities
 def ward_link_scrapper(url_for_wards):
-    ward_soup = soup_boilling(url_for_wards)
+    ward_soup = soup_boiling(url_for_wards)
     url_part = url_for_wards.split('/')[2:][:-1]
     ward_links = []
     for item in ward_soup.table.find_all('td'):
@@ -88,10 +118,14 @@ def link_municipality_scrapper(soup, url):
 
     for index, item in enumerate(soup.find_all('td')):
         if (index + 1) % 3 == 0:
-            sub_links.append(item.a.attrs['href'])
+            try:
+                sub_links.append(item.a.attrs['href'])
+            except AttributeError:
+                continue
             links.append(sub_links)
             sub_links = []
             continue
+
         sub_links.append(item.text)
 
     for index, item in enumerate(links):
@@ -108,22 +142,13 @@ def link_municipality_scrapper(soup, url):
     header_names.insert(3, 'city_name')
 
 
-# region name, district name
-def region_name(soup):
-    region = [
-        item.text.strip('\n').split(':')[1]
-        for item in soup.find_all('h3')
-    ]
-    result_election_frame['region'] = region[0]
-    result_election_frame['district'] = region[1]
+def list_of_candidates(url):
+    url_part = url.split('/')[2:][:-1]
 
-    header_names.append('region')
-    header_names.append('district')
-
-
-def list_of_candidates():
     soup_candidates = \
-        soup_boilling('https://volby.cz/pls/ps2017nss/ps82?xjazyk=CZ')
+        soup_boiling(
+            'https://' + '/'.join(url_part) + '/' + 'ps82?xjazyk=CZ'
+        )
 
     parties = [item.text
                for index, item in
@@ -156,9 +181,10 @@ def csv_writer(file_name):
 
 # main()
 def scrap_elect(url, file_name):
-    soup = soup_boilling(url)
-    region_name(soup)
-    list_of_candidates()
+    year = election_year(url)
+    soup = soup_boiling(url)
+    region_name(soup, year)
+    list_of_candidates(url)
 
     link_municipality_scrapper(soup, url)
     data_municipality_scrapper()
@@ -167,6 +193,7 @@ def scrap_elect(url, file_name):
 
 
 if __name__ == '__main__':
-    scrap_elect('https://www.volby.cz/pls/ps2017nss/'
-                'ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
-                'election_data_2017')
+    scrap_elect(
+        'https://volby.cz/pls/ps1996/u5311?xkraj=32&xokres=11',
+        'election_data_2006'
+    )
