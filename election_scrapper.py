@@ -1,17 +1,12 @@
 # https://github.com/daim77/election_scrapper.git
 # Elections to the Chamber of Deputies of the Parliament of the Czech Republic
-# held on 20 – 21 October 2017
+# from 1996 - 20017
 
-# Uživatelské vstupy
-# Skript očekává dva vstupy: odkaz na seznam obcí daného okresu a název csv
-# souboru bez přípony .csv.
+# INPUT
+# href for municipalities within particular choosen district
+# csv name
 
-# Výstup
-# Hlavička csv souboru má mít podobu: kód obce, název obce, voliči v seznamu,
-# vydané obálky, platné hlasy, kandidující strany.
-# Každý řádek csv souboru potom bude speciální pro každou obec.
-
-# data structure for one municipality:
+# DATA STRUCTURE for one municipality - dict:
 # region, district, city_number, city_name, links,
 # registered, envelopes, valid, all_parties
 
@@ -59,6 +54,72 @@ def region_name(soup, year):
 
     header_names.append('region')
     header_names.append('district')
+
+
+def list_of_candidates(url, year):
+    url_part = url.split('/')[2:][:-1]
+    if year >= 2006:
+        soup_candidates = soup_boiling(
+            'https://' + '/'.join(url_part) + '/' + 'ps82?xjazyk=CZ'
+        )
+
+        parties = [item.text
+                   for index, item in
+                   enumerate(soup_candidates.table.find_all('td'))
+                   if (index + 1) % 3 == 0]
+
+    elif year == 2002:
+        soup_candidates = soup_boiling(
+            'https://' + '/'.join(url_part) + '/' + 'ps72?xjazyk=CZ'
+        )
+        parties = [item.text
+                   for index, item in
+                   enumerate(soup_candidates.table.find_all('th')[15:])
+                   if (index + 1) % 2 == 0]
+
+    else:
+        soup_candidates = soup_boiling(
+            'https://' + '/'.join(url_part) + '/' + 'u32?xpl=0&xtr=2'
+        )
+        parties = [str(100 + int(index / 12))[1:] + ':' + item.text
+                   for index, item in
+                   enumerate(soup_candidates.table.find_all('td'))
+                   if (index) % 12 == 0][1:]
+
+    for member in parties:
+        result_election_frame[member] = 0
+        header_names.append(member)
+
+
+def link_municipality_scrapper(soup, url):
+    sub_links = []
+    links = []
+    url_part = url.split('/')[2:][:-1]
+
+    for index, item in enumerate(soup.find_all('td')):
+        if (index + 1) % 3 == 0:
+            try:
+                sub_links.append(item.a.attrs['href'])
+            except AttributeError:
+                continue
+            links.append(sub_links)
+            sub_links = []
+            continue
+
+        sub_links.append(item.text)
+
+    for index, item in enumerate(links):
+        # result_election.append(result_election_frame)
+        result_election.append({})
+        result_election[index]['city_number'] = item[0]
+        result_election[index]['city_name'] = item[1]
+
+        url = 'https://' + '/'.join(url_part) + '/' + item[2]
+        result_election[index]['links'] = [url]
+        result_election[index].update(result_election_frame)
+
+    header_names.insert(2, 'city_number')
+    header_names.insert(3, 'city_name')
 
 
 def data_municipality_scrapper():
@@ -111,55 +172,6 @@ def ward_link_scrapper(url_for_wards):
     # vse vratit do data_municipality scrapper
 
 
-def link_municipality_scrapper(soup, url):
-    sub_links = []
-    links = []
-    url_part = url.split('/')[2:][:-1]
-
-    for index, item in enumerate(soup.find_all('td')):
-        if (index + 1) % 3 == 0:
-            try:
-                sub_links.append(item.a.attrs['href'])
-            except AttributeError:
-                continue
-            links.append(sub_links)
-            sub_links = []
-            continue
-
-        sub_links.append(item.text)
-
-    for index, item in enumerate(links):
-        # result_election.append(result_election_frame)
-        result_election.append({})
-        result_election[index]['city_number'] = item[0]
-        result_election[index]['city_name'] = item[1]
-
-        url = 'https://' + '/'.join(url_part) + '/' + item[2]
-        result_election[index]['links'] = [url]
-        result_election[index].update(result_election_frame)
-
-    header_names.insert(2, 'city_number')
-    header_names.insert(3, 'city_name')
-
-
-def list_of_candidates(url):
-    url_part = url.split('/')[2:][:-1]
-
-    soup_candidates = \
-        soup_boiling(
-            'https://' + '/'.join(url_part) + '/' + 'ps82?xjazyk=CZ'
-        )
-
-    parties = [item.text
-               for index, item in
-               enumerate(soup_candidates.table.find_all('td'))
-               if (index + 1) % 3 == 0]
-
-    for member in parties:
-        result_election_frame[member] = 0
-        header_names.append(member)
-
-
 def csv_writer(file_name):
     file_name += '.csv'
     try:
@@ -184,7 +196,7 @@ def scrap_elect(url, file_name):
     year = election_year(url)
     soup = soup_boiling(url)
     region_name(soup, year)
-    list_of_candidates(url)
+    list_of_candidates(url, year)
 
     link_municipality_scrapper(soup, url)
     data_municipality_scrapper()
@@ -195,5 +207,5 @@ def scrap_elect(url, file_name):
 if __name__ == '__main__':
     scrap_elect(
         'https://volby.cz/pls/ps1996/u5311?xkraj=32&xokres=11',
-        'election_data_2006'
+        'election_data_1996'
     )
