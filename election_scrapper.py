@@ -20,6 +20,7 @@ result_election_frame = {}
 result_election = []
 header_names = []
 translate = {}
+translate_six = {}
 
 
 def election_year(url):
@@ -62,7 +63,7 @@ def region_name(soup, year):
 
 
 def list_of_candidates(url, year):
-    global translate
+    global translate, translate_six
     url_part = url.split('/')[2:][:-1]
     if year >= 2006:
         soup_candidates = soup_boiling(
@@ -73,6 +74,10 @@ def list_of_candidates(url, year):
                    for index, item in
                    enumerate(soup_candidates.table.find_all('td'))
                    if (index + 1) % 3 == 0]
+
+        order = [str(num) for num in range(1, len(parties) + 1)]
+
+        translate_six = dict(zip(order, parties))
 
     elif year == 2002:
         soup_candidates = soup_boiling(
@@ -160,7 +165,6 @@ def id_municipality_scrapper(links, url_part):
 def data_municipality_scrapper(year):
     if year >= 2006:
         for item in result_election:
-            # if len(item['links'][0]) < 80:
             if '&xvyber=' not in item['links'][0]:
                 ward_links = ward_link_scrapper(item['links'][0])
                 item['links'] = ward_links
@@ -174,16 +178,34 @@ def data_municipality_scrapper(year):
 
                 figures = [
                     figure.text.replace(' ', '')
-                    for figure in sub_soup.table.find_all('td')
+                    for figure in sub_soup.find_all('td')
+                    if figure.text != ''
                 ]
-                if len(figures) == 6:
+                # if len(figures) == 6:
+                #     corr = 3
+                # else:
+                #     corr = 0
+
+                if '&xokrsek=' in link:
                     corr = 3
                 else:
                     corr = 0
 
-                item['registered'] += int(figures[3 - corr])
-                item['envelope'] += int(figures[4 - corr])
-                item['valid'] += int(figures[7 - corr])
+                item['registered'] += int(figures[3 - corr].replace(' ', ''))
+                item['envelope'] += int(figures[4 - corr].replace(' ', ''))
+                item['valid'] += int(figures[7 - corr].replace(' ', ''))
+
+                if '&xokrsek=' in link:
+                    figures = figures[6:]
+                else:
+                    figures = figures[9:]
+
+                for index, item_ in enumerate(figures):
+                    if (index + 1) % 5 == 0:
+
+                        value = int(figures[index - 2].replace(' ', ''))
+                        key = figures[index - 4]
+                        item[translate_six[key]] += value
 
     elif year == 2002:
         for item in result_election:
@@ -295,10 +317,10 @@ if __name__ == '__main__':
     #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
     #     'election_data_2017'
     # )
-    # scrap_elect(
-    #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103',
-    #     'election_data_2017_JH'
-    # )
+    scrap_elect(
+        'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103',
+        'election_data_2017_JH'
+    )
 
     # scrap_elect(
     #     'https://volby.cz/pls/ps2013/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
@@ -320,10 +342,10 @@ if __name__ == '__main__':
     #     'election_data_2002'
     # )
     #
-    scrap_elect(
-        'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=3&xokres=3103',
-        'election_data_2002_JH'
-    )
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=3&xokres=3103',
+    #     'election_data_2002_JH'
+    # )
     #
     # scrap_elect(
     #     'https://volby.cz/pls/ps1998/u5311?xkraj=32&xokres=11',
