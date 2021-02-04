@@ -174,8 +174,26 @@ def data_municipality_scrapper(year):
                 item['valid'] += int(figures[7 - corr])
 
     elif year == 2002:
-        print('data for 2002')
-        exit()
+        for item in result_election:
+            if '&xokrsek=' not in item['links'][0]:
+                ward_links = ward_link_scrapper(item['links'][0])
+                item['links'] = ward_links
+
+            item['registered'] = 0
+            item['envelope'] = 0
+            item['valid'] = 0
+
+            for link in item['links']:
+                sub_soup = soup_boiling(link)
+
+                figures = [
+                    figure.text.replace(' ', '').replace(' ', '')
+                    for figure in sub_soup.table.find_all('td')
+                ]
+
+                item['registered'] += int(figures[3])
+                item['envelope'] += int(figures[4])
+                item['valid'] += int(figures[7])
 
     else:
         for item in result_election:
@@ -207,8 +225,6 @@ def ward_link_scrapper(url_for_wards):
         except AttributeError:
             continue
     return ward_links
-    # extrahovat total data a ty pak suma secist
-    # vse vratit do data_municipality scrapper
 
 
 def csv_writer(file_name):
@@ -247,6 +263,6 @@ def scrap_elect(url, file_name):
 
 if __name__ == '__main__':
     scrap_elect(
-        'https://volby.cz/pls/ps1996/u5311?xkraj=32&xokres=11',
-        'election_data_1996'
+        'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=2&xokres=2111',
+        'election_data_2002'
     )
