@@ -3,7 +3,7 @@
 # from 1996 - 20017
 
 # INPUT
-# href for municipalities within particular choosen district
+# link of municipalities list within particular choosen district
 # csv name
 
 # DATA STRUCTURE for one municipality - dict:
@@ -11,9 +11,9 @@
 # registered, envelopes, valid, all_parties
 
 import csv
-from pprint import pprint as pp
 import requests
 import bs4
+# TODO import os a pouzit os.sep
 
 
 result_election_frame = {}
@@ -199,13 +199,21 @@ def data_municipality_scrapper(year):
                 sub_soup = soup_boiling(link)
 
                 figures = [
-                    figure.text.replace(' ', '').replace(' ', '')
-                    for figure in sub_soup.table.find_all('td')
+                    figure.text.replace(' ', '')
+                    for figure in sub_soup.find_all('td')
+                    if figure.text != ''
                 ]
 
-                item['registered'] += int(figures[3])
-                item['envelope'] += int(figures[4])
-                item['valid'] += int(figures[7])
+                item['registered'] += int(figures[3].replace(' ', ''))
+                item['envelope'] += int(figures[4].replace(' ', ''))
+                item['valid'] += int(figures[7].replace(' ', ''))
+
+                figures = figures[9:]
+                for index, item_ in enumerate(figures):
+                    if (index + 1) % 4 == 0:
+                        value = int(figures[index - 1].replace(' ', ''))
+                        key = figures[index - 2]
+                        item[key] += value
 
     else:
         for item in result_election:
@@ -216,9 +224,9 @@ def data_municipality_scrapper(year):
                 if figure.text != ''
             ]
 
-            item['registered'] = int(figures[3])
-            item['envelope'] = int(figures[4])
-            item['valid'] = int(figures[7])
+            item['registered'] = int(figures[3].replace(' ', ''))
+            item['envelope'] = int(figures[4].replace(' ', ''))
+            item['valid'] = int(figures[7].replace(' ', ''))
 
             figures = figures[9:]
             for index, item_ in enumerate(figures):
@@ -268,6 +276,9 @@ def csv_writer(file_name):
 
 # main()
 def scrap_elect(url, file_name):
+    # TODO vstup uzivatele: link na seznam obci daneho okresu a jmeno souboru
+    # TODO script vytvori slozku ve stejnem adresari jako je script
+    #  a ulozi tam csv soubor
     year = election_year(url)
     soup = soup_boiling(url)
     region_name(soup, year)
@@ -275,8 +286,6 @@ def scrap_elect(url, file_name):
     link_municipality_scrapper(soup, url, year)
 
     data_municipality_scrapper(year)
-
-    pp(result_election)
 
     csv_writer(file_name)
 
@@ -286,11 +295,11 @@ if __name__ == '__main__':
     #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
     #     'election_data_2017'
     # )
-    scrap_elect(
-        'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103',
-        'election_data_2017_JH'
-    )
-    # https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103',
+    #     'election_data_2017_JH'
+    # )
+
     # scrap_elect(
     #     'https://volby.cz/pls/ps2013/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
     #     'election_data_2013'
@@ -311,10 +320,10 @@ if __name__ == '__main__':
     #     'election_data_2002'
     # )
     #
-    # scrap_elect(
-    #     'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=3&xokres=3103',
-    #     'election_data_2002_JH'
-    # )
+    scrap_elect(
+        'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=3&xokres=3103',
+        'election_data_2002_JH'
+    )
     #
     # scrap_elect(
     #     'https://volby.cz/pls/ps1998/u5311?xkraj=32&xokres=11',
