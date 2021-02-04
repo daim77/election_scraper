@@ -37,22 +37,25 @@ def soup_boiling(url):
 def region_name(soup, year):
     if year >= 2006:
         region = [
-            item.text.strip('\n').split(':')[1]
+            item.text.strip('\n').split(':')[1:]
             for item in soup.find_all('h3')
         ]
     elif year == 2002:
         region = [
-            item.text.replace(' ', '').split(':')[1]
+            item.text.replace(' ', '').split(':')[1:]
             for item in soup.find_all('b')
         ]
     else:
         region = [
-            item.text.split(' ')[1]
+            item.text.split(' ')[1:]
             for item in soup.find_all('b')[1:]
         ]
 
-    result_election_frame['region'] = region[0]
-    result_election_frame['district'] = region[1]
+    result_election_frame['region'] = region[0][0]
+    if len(region[1]) == 1:
+        result_election_frame['district'] = region[1][0]
+    else:
+        result_election_frame['district'] = ' '.join(region[1])
 
     header_names.append('region')
     header_names.append('district')
@@ -283,7 +286,11 @@ if __name__ == '__main__':
     #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
     #     'election_data_2017'
     # )
-
+    scrap_elect(
+        'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103',
+        'election_data_2017_JH'
+    )
+    # https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103
     # scrap_elect(
     #     'https://volby.cz/pls/ps2013/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
     #     'election_data_2013'
@@ -304,12 +311,22 @@ if __name__ == '__main__':
     #     'election_data_2002'
     # )
     #
-    scrap_elect(
-        'https://volby.cz/pls/ps1998/u5311?xkraj=32&xokres=11',
-        'election_data_1998'
-    )
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=3&xokres=3103',
+    #     'election_data_2002_JH'
+    # )
+    #
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps1998/u5311?xkraj=32&xokres=11',
+    #     'election_data_1998'
+    # )
     #
     # scrap_elect(
     #     'https://volby.cz/pls/ps1996/u5311?xkraj=32&xokres=11',
     #     'election_data_1996'
+    # )
+    #
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps1998/u5311?xkraj=33&xokres=3',
+    #     'election_data_1998_JH'
     # )
