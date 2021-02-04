@@ -19,6 +19,7 @@ import bs4
 result_election_frame = {}
 result_election = []
 header_names = []
+translate = {}
 
 
 def election_year(url):
@@ -58,6 +59,7 @@ def region_name(soup, year):
 
 
 def list_of_candidates(url, year):
+    global translate
     url_part = url.split('/')[2:][:-1]
     if year >= 2006:
         soup_candidates = soup_boiling(
@@ -82,10 +84,16 @@ def list_of_candidates(url, year):
         soup_candidates = soup_boiling(
             'https://' + '/'.join(url_part) + '/' + 'u32?xpl=0&xtr=2'
         )
+
         parties = [str(100 + int(index / 12))[1:] + ':' + item.text
                    for index, item in
                    enumerate(soup_candidates.table.find_all('td'))
                    if index % 12 == 0][1:]
+
+        order = [str(number + 100)[1:]
+                 for number in range(1, len(parties) + 1)]
+
+        translate = dict(zip(order, parties))
 
     for member in parties:
         result_election_frame[member] = 0
@@ -149,7 +157,8 @@ def id_municipality_scrapper(links, url_part):
 def data_municipality_scrapper(year):
     if year >= 2006:
         for item in result_election:
-            if len(item['links'][0]) < 80:
+            # if len(item['links'][0]) < 80:
+            if '&xvyber=' not in item['links'][0]:
                 ward_links = ward_link_scrapper(item['links'][0])
                 item['links'] = ward_links
 
@@ -200,12 +209,20 @@ def data_municipality_scrapper(year):
             sub_soup = soup_boiling(item['links'][0])
             figures = [
                 figure.text.replace(' ', '')
-                for figure in sub_soup.table.find_all('td')
+                for figure in sub_soup.find_all('td')
+                if figure.text != ''
             ]
 
             item['registered'] = int(figures[3])
             item['envelope'] = int(figures[4])
             item['valid'] = int(figures[7])
+
+            figures = figures[9:]
+            for index, item_ in enumerate(figures):
+                if (index + 1) % 4 == 0:
+                    value = figures[index - 1]
+                    key = figures[index - 3]
+                    item[translate[key]] += int(value)
 
     header_names.insert(4, 'registered')
     header_names.insert(5, 'envelope')
@@ -262,7 +279,37 @@ def scrap_elect(url, file_name):
 
 
 if __name__ == '__main__':
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
+    #     'election_data_2017'
+    # )
+
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps2013/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
+    #     'election_data_2013'
+    # )
+
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps2010/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
+    #     'election_data_2010'
+    # )
+    #
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps2006/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
+    #     'election_data_2006'
+    # )
+    #
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=2&xokres=2111',
+    #     'election_data_2002'
+    # )
+    #
     scrap_elect(
-        'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=2&xokres=2111',
-        'election_data_2002'
+        'https://volby.cz/pls/ps1998/u5311?xkraj=32&xokres=11',
+        'election_data_1998'
     )
+    #
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps1996/u5311?xkraj=32&xokres=11',
+    #     'election_data_1996'
+    # )
