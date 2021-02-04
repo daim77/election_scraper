@@ -1,4 +1,4 @@
-# https://github.com/daim77/election_scrapper.git
+# https://github.com/daim77/election_scraper.git
 # Elections to the Chamber of Deputies of the Parliament of the Czech Republic
 # from 1996 - 20017
 
@@ -108,7 +108,7 @@ def list_of_candidates(url, year):
         header_names.append(member)
 
 
-def link_municipality_scrapper(soup, url, year):
+def link_municipality_scraper(soup, url, year):
     sub_links = []
     links = []
     url_part = url.split('/')[2:][:-1]
@@ -144,10 +144,10 @@ def link_municipality_scrapper(soup, url, year):
                 continue
             sub_links.append(item.text)
 
-    id_municipality_scrapper(links, url_part)
+    id_municipality_scraper(links, url_part)
 
 
-def id_municipality_scrapper(links, url_part):
+def id_municipality_scraper(links, url_part):
 
     for index, item in enumerate(links):
         result_election.append({})
@@ -162,11 +162,11 @@ def id_municipality_scrapper(links, url_part):
     header_names.insert(3, 'city_name')
 
 
-def data_municipality_scrapper(year):
+def data_municipality_scraper(year):
     if year >= 2006:
         for item in result_election:
             if '&xvyber=' not in item['links'][0]:
-                ward_links = ward_link_scrapper(item['links'][0])
+                ward_links = ward_link_scraper(item['links'][0])
                 item['links'] = ward_links
 
             item['registered'] = 0
@@ -210,7 +210,7 @@ def data_municipality_scrapper(year):
     elif year == 2002:
         for item in result_election:
             if '&xokrsek=' not in item['links'][0]:
-                ward_links = ward_link_scrapper(item['links'][0])
+                ward_links = ward_link_scraper(item['links'][0])
                 item['links'] = ward_links
 
             item['registered'] = 0
@@ -263,7 +263,7 @@ def data_municipality_scrapper(year):
 
 
 # wards in some municipalities
-def ward_link_scrapper(url_for_wards):
+def ward_link_scraper(url_for_wards):
     ward_soup = soup_boiling(url_for_wards)
     url_part = url_for_wards.split('/')[2:][:-1]
     ward_links = []
@@ -305,9 +305,9 @@ def scrap_elect(url, file_name):
     soup = soup_boiling(url)
     region_name(soup, year)
     list_of_candidates(url, year)
-    link_municipality_scrapper(soup, url, year)
+    link_municipality_scraper(soup, url, year)
 
-    data_municipality_scrapper(year)
+    data_municipality_scraper(year)
 
     csv_writer(file_name)
 
