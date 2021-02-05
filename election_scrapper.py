@@ -11,8 +11,9 @@
 # registered, envelopes, valid, all_parties
 
 import csv
+import os
 import requests
-import bs4
+from bs4 import BeautifulSoup
 # TODO import os a pouzit os.sep
 
 
@@ -24,13 +25,13 @@ translate_six = {}
 
 
 def election_year(url):
-    year = int(url.split('/')[4][2:].replace('nss', ''))
+    year = int(url.split(os.sep)[4][2:].replace('nss', ''))
     return year
 
 
 def soup_boiling(url):
     html_data = requests.get(url)
-    soup = bs4.BeautifulSoup(html_data.text, "html.parser")
+    soup = BeautifulSoup(html_data.text, "html.parser")
     return soup
 
 
@@ -64,10 +65,12 @@ def region_name(soup, year):
 
 def list_of_candidates(url, year):
     global translate, translate_six
-    url_part = url.split('/')[2:][:-1]
+    url_part = url.split(os.sep)[2:][:-1]
     if year >= 2006:
         soup_candidates = soup_boiling(
-            'https://' + '/'.join(url_part) + '/' + 'ps82?xjazyk=CZ'
+            'https:' + os.sep + os.sep
+            + '/'.join(url_part) + os.sep
+            + 'ps82?xjazyk=CZ'
         )
 
         parties = [item.text
@@ -81,7 +84,7 @@ def list_of_candidates(url, year):
 
     elif year == 2002:
         soup_candidates = soup_boiling(
-            'https://' + '/'.join(url_part) + '/' + 'ps72?xjazyk=CZ'
+            'https://' + '/'.join(url_part) + os.sep + 'ps72?xjazyk=CZ'
         )
         parties = [item.text
                    for index, item in
@@ -297,6 +300,7 @@ def csv_writer(file_name):
     except IOError:
         print("I/O error")
     return
+
 
 # main()
 def scrap_elect(url, file_name):
