@@ -1,18 +1,14 @@
+# ===== Martin DANEK=====
 # https://github.com/daim77/election_scraper.git
-# Elections to the Chamber of Deputies of the Parliament of the Czech Republic
-# from 1996 - 20017
-
-# INPUT
-# link of municipalities list within particular choosen district
-# csv name
 
 # DATA STRUCTURE for one municipality - dict:
 # region, district, city_number, city_name, links,
-# registered, envelopes, valid, all_parties
+# registered, envelopes, valid, *all_parties
 
 import csv
 import requests
 import os
+import string
 from bs4 import BeautifulSoup
 
 
@@ -46,8 +42,16 @@ def welcome_to_scraper():
     url = input('Insert link: ')
     file_name = input('Insert file name: ')
 
+    not_valid_char = string.punctuation.replace('-', '').replace('_', '')
+
+    for char in not_valid_char:
+        if char in file_name:
+            print('Illegal characters in file name!')
+            exit()
+
     print(line)
     print('stahuji data...')
+
     return url, file_name
 
 
@@ -303,7 +307,6 @@ def data_municipality_scraper(year):
     header_names.insert(6, 'valid')
 
 
-# wards in some municipalities = scrap sublinks
 def ward_link_scraper(url_for_wards):
     ward_soup = soup_boiling(url_for_wards)
     url_part = url_for_wards.split('/')[2:][:-1]
@@ -338,87 +341,30 @@ def csv_writer(file_name):
                 writer.writerow(row)
 
             path = os.getcwd() + os.sep + file_name
-            print('Data available here:')
+            print('You are lucky! Data available here:')
             print('=' * 80)
             print(path)
+            print('=' * 80)
     except IOError:
         print("I/O error")
     return
 
 
-# main()
 def chamber_of_deputies():
-    # TODO script vytvori slozku ve stejnem adresari jako je script
-    #  a ulozi tam csv soubor
+    try:
+        url, file_name = welcome_to_scraper()
 
-    url, file_name = welcome_to_scraper()
+        year = election_year(url)
+        soup = soup_boiling(url)
+        region_name(soup, year)
+        list_of_candidates(url, year)
+        link_municipality_scraper(soup, url, year)
+        data_municipality_scraper(year)
+        csv_writer(file_name)
 
-    year = election_year(url)
-    soup = soup_boiling(url)
-    region_name(soup, year)
-    list_of_candidates(url, year)
-    link_municipality_scraper(soup, url, year)
-    data_municipality_scraper(year)
-    csv_writer(file_name)
+    except (ValueError, IndexError, TypeError, AttributeError):
+        print('Sorry - wrong link')
 
 
 if __name__ == '__main__':
     chamber_of_deputies()
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps2010/ps32?xjazyk=EN&xkraj=7&xnumnuts=5103',
-    #     'election_data_2010_liberec_EN'
-    # )
-    #
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps2010/ps32?xjazyk=CZ&xkraj=7&xnumnuts=5103',
-    #     'election_data_2010_liberec'
-    # )
-    #
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
-    #     'election_data_2017'
-    # )
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103',
-    #     'election_data_2017_JH'
-    # )
-
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps2013/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
-    #     'election_data_2013'
-    # )
-
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps2010/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
-    #     'election_data_2010'
-    # )
-    #
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps2006/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
-    #     'election_data_2006'
-    # )
-    #
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=2&xokres=2111',
-    #     'election_data_2002'
-    # )
-    #
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=3&xokres=3103',
-    #     'election_data_2002_JH'
-    # )
-    #
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps1998/u5311?xkraj=32&xokres=11',
-    #     'election_data_1998'
-    # )
-    #
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps1996/u5311?xkraj=32&xokres=11',
-    #     'election_data_1996'
-    # )
-    #
-    # chamber_of_deputies(
-    #     'https://volby.cz/pls/ps1998/u5311?xkraj=33&xokres=3',
-    #     'election_data_1998_JH'
-    # )
