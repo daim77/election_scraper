@@ -12,6 +12,7 @@
 
 import csv
 import requests
+import os
 from bs4 import BeautifulSoup
 
 
@@ -23,31 +24,31 @@ translate_six = {}
 
 
 def welcome_to_scraper():
-    line = '*' * 100
+    line = '*' * 80
+    print()
+    print(line)
+    print('{:^80}'.format(
+        'ELECTION SCRAPER - CHAMBER OF DEPUTIES of CZECH REPUBLIC'
+    ))
+    print('{:^80}'.format('1996 - 2017'))
+    print(line)
+    print('{:<80}'.format('More years available in czech version'))
+    print('{:<80}'.format('1. Open https://volby.cz/index_en.htm and select '
+                          'year'))
+    print('{:<80}'.format("2. Click on 'Results for territorial units'"))
+    print('{:<80}'.format("3. Click on 'X' in a column 'Choice of "
+                          "municipality'"))
+    print('{:<80}'.format('4. Copy this link'))
+    print('{:<80}'.format('5. Prepare file name for result saving in csv '
+                          'format'))
+    print(line)
 
-    print(line)
-    print('{:^100}'.format(
-        'WELCOME TO ELECTION SCRAPER of CHAMBER OF DEPUTIES in Czech Republic'
-    ))
-    print('{:^100}'.format('1996 - 2017'))
-    print(line)
-    print('{:<100}'.format('1. Jdi na https://volby.cz a vyber rok'))
-    print('{:<100}'.format(
-        "2. Klikni na 'Výsledky hlasování za územní celky'"
-    ))
-    print('{:<100}'.format("3. Klikni na X ve sloupci 'Výběr obce'"))
-    print('{:<100}'.format('4. Tento link zkopíruj'))
-    print('{:<100}'.format(
-        '5. Připrav si jméno souboru kam se uloží výsledky'
-    ))
-    print(line)
-
-    input('Vloz link z volby.cz: ')
-    input('vloz jmeno souboru: ')
+    url = input('Insert link: ')
+    file_name = input('Insert file name: ')
 
     print(line)
     print('stahuji data...')
-    return
+    return url, file_name
 
 
 def election_year(url):
@@ -91,12 +92,18 @@ def region_name(soup, year):
 
 def list_of_candidates(url, year):
     global translate, translate_six
+
+    if 'jazyk=EN' in url:
+        mutation = 'EN'
+    else:
+        mutation = 'CZ'
+
     url_part = url.split('/')[2:][:-1]
     if year >= 2006:
         soup_candidates = soup_boiling(
             'https:' + '/' * 2
             + '/'.join(url_part) + '/'
-            + 'ps82?xjazyk=CZ'
+            + 'ps82?xjazyk=' + mutation
         )
 
         parties = [item.text
@@ -112,7 +119,7 @@ def list_of_candidates(url, year):
         soup_candidates = soup_boiling(
             'https:' + '/' * 2
             + '/'.join(url_part) + '/'
-            + 'ps72?xjazyk=CZ'
+            + 'ps72?xjazyk=' + mutation
         )
         parties = [item.text
                    for index, item in
@@ -329,19 +336,23 @@ def csv_writer(file_name):
             writer.writeheader()
             for row in result_election:
                 writer.writerow(row)
+
+            path = os.getcwd() + os.sep + file_name
+            print('Data available here:')
+            print('=' * 80)
+            print(path)
     except IOError:
         print("I/O error")
     return
 
 
 # main()
-def chamber_of_deputies(url, file_name):
-    # TODO info pro uzivatele
-    # TODO vstup uzivatele: link na seznam obci daneho okresu a jmeno souboru
+def chamber_of_deputies():
     # TODO script vytvori slozku ve stejnem adresari jako je script
     #  a ulozi tam csv soubor
-    # TODO nejede to anglicky - v linku je en a ne cz
-    welcome_to_scraper()
+
+    url, file_name = welcome_to_scraper()
+
     year = election_year(url)
     soup = soup_boiling(url)
     region_name(soup, year)
@@ -352,10 +363,16 @@ def chamber_of_deputies(url, file_name):
 
 
 if __name__ == '__main__':
-    chamber_of_deputies(
-        'https://volby.cz/pls/ps2010/ps32?xjazyk=CZ&xkraj=7&xnumnuts=5103',
-        'election_data_2010_liberec'
-    )
+    chamber_of_deputies()
+    # chamber_of_deputies(
+    #     'https://volby.cz/pls/ps2010/ps32?xjazyk=EN&xkraj=7&xnumnuts=5103',
+    #     'election_data_2010_liberec_EN'
+    # )
+    #
+    # chamber_of_deputies(
+    #     'https://volby.cz/pls/ps2010/ps32?xjazyk=CZ&xkraj=7&xnumnuts=5103',
+    #     'election_data_2010_liberec'
+    # )
     #
     # chamber_of_deputies(
     #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
