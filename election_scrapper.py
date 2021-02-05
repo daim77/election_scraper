@@ -157,7 +157,10 @@ def id_municipality_scraper(links, url_part):
         result_election[index]['city_number'] = item[0]
         result_election[index]['city_name'] = item[1]
 
-        url = 'https://' + '/'.join(url_part) + '/' + item[2]
+        url = 'https:' + os.sep + os.sep \
+              + '/'.join(url_part) \
+              + os.sep + item[2]
+
         result_election[index]['links'] = [url]
         result_election[index].update(result_election_frame)
 
@@ -184,10 +187,6 @@ def data_municipality_scraper(year):
                     for figure in sub_soup.find_all('td')
                     if figure.text != ''
                 ]
-                # if len(figures) == 6:
-                #     corr = 3
-                # else:
-                #     corr = 0
 
                 if '&xokrsek=' in link:
                     corr = 3
@@ -267,15 +266,18 @@ def data_municipality_scraper(year):
     header_names.insert(6, 'valid')
 
 
-# wards in some municipalities
+# wards in some municipalities = scrap sublinks
 def ward_link_scraper(url_for_wards):
     ward_soup = soup_boiling(url_for_wards)
     url_part = url_for_wards.split('/')[2:][:-1]
     ward_links = []
+
     for item in ward_soup.table.find_all('td'):
         try:
             ward_links.append(
-                'https://' + '/'.join(url_part) + '/' + item.a.attrs['href']
+                'https:' + os.sep + os.sep
+                + '/'.join(url_part)
+                + os.sep + item.a.attrs['href']
             )
         except AttributeError:
             continue
@@ -303,7 +305,7 @@ def csv_writer(file_name):
 
 
 # main()
-def scrap_elect(url, file_name):
+def chamber_of_deputies(url, file_name):
     # TODO vstup uzivatele: link na seznam obci daneho okresu a jmeno souboru
     # TODO script vytvori slozku ve stejnem adresari jako je script
     #  a ulozi tam csv soubor
@@ -319,56 +321,56 @@ def scrap_elect(url, file_name):
 
 
 if __name__ == '__main__':
-    scrap_elect(
+    chamber_of_deputies(
         'https://volby.cz/pls/ps2010/ps32?xjazyk=CZ&xkraj=7&xnumnuts=5103',
         'election_data_2010_liberec'
     )
     #
-    # scrap_elect(
+    # chamber_of_deputies(
     #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
     #     'election_data_2017'
     # )
-    # scrap_elect(
+    # chamber_of_deputies(
     #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103',
     #     'election_data_2017_JH'
     # )
 
-    # scrap_elect(
+    # chamber_of_deputies(
     #     'https://volby.cz/pls/ps2013/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
     #     'election_data_2013'
     # )
 
-    # scrap_elect(
+    # chamber_of_deputies(
     #     'https://volby.cz/pls/ps2010/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
     #     'election_data_2010'
     # )
     #
-    # scrap_elect(
+    # chamber_of_deputies(
     #     'https://volby.cz/pls/ps2006/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
     #     'election_data_2006'
     # )
     #
-    # scrap_elect(
+    # chamber_of_deputies(
     #     'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=2&xokres=2111',
     #     'election_data_2002'
     # )
     #
-    # scrap_elect(
+    # chamber_of_deputies(
     #     'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=3&xokres=3103',
     #     'election_data_2002_JH'
     # )
     #
-    # scrap_elect(
+    # chamber_of_deputies(
     #     'https://volby.cz/pls/ps1998/u5311?xkraj=32&xokres=11',
     #     'election_data_1998'
     # )
     #
-    # scrap_elect(
+    # chamber_of_deputies(
     #     'https://volby.cz/pls/ps1996/u5311?xkraj=32&xokres=11',
     #     'election_data_1996'
     # )
     #
-    # scrap_elect(
+    # chamber_of_deputies(
     #     'https://volby.cz/pls/ps1998/u5311?xkraj=33&xokres=3',
     #     'election_data_1998_JH'
     # )
