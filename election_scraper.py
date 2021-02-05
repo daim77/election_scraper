@@ -331,9 +331,16 @@ def ward_link_scraper(url_for_wards):
 
 
 def csv_writer(file_name):
+
+    path = os.getcwd() + os.sep + 'tables'
+    if not os.path.exists(path):
+        os.mkdir(path)
+
     file_name += '.csv'
+
     try:
-        with open(file_name, mode='w', encoding='utf-8') as csv_file:
+        with open(path + os.sep + file_name, mode='w', encoding='utf-8') \
+                as csv_file:
 
             writer = csv.DictWriter(
                 csv_file,
