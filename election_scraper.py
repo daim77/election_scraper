@@ -20,24 +20,24 @@ translate_six = {}
 
 
 def welcome_to_scraper():
-    line = '*' * 80
+    line = '*' * 100
     print()
     print(line)
-    print('{:^80}'.format(
+    print('{:^100}'.format(
         'ELECTION SCRAPER - CHAMBER OF DEPUTIES of CZECH REPUBLIC'
     ))
-    print('{:^80}'.format('1996 - 2017'))
+    print('{:^100}'.format('1996 - 2017'))
     print(line)
-    print('{:<80}'.format('More years available in czech version'))
-    print('{:<80}'.format('1. Open https://volby.cz/index_en.htm and select '
+    print('{:<100}'.format('More years available in czech version'))
+    print('{:<100}'.format('1. Open https://volby.cz/index_en.htm and select '
                           'year'))
-    print('{:<80}'.format("2. Click on 'Results for territorial units'"))
-    print('{:<80}'.format("3. Click on 'X' in a column 'Choice of "
+    print('{:<100}'.format("2. Click on 'Results for territorial units'"))
+    print('{:<100}'.format("3. Click on 'X' in a column 'Choice of "
                           "municipality'"))
-    print('{:<80}'.format('4. Copy this link'))
-    print('{:<80}'.format('5. Prepare file name for result saving in csv '
+    print('{:<100}'.format('4. Copy this link'))
+    print('{:<100}'.format('5. Prepare file name for result saving in csv '
                           'format'))
-    print('{:<80}'.format("6. Result is saved to folder >>tables<<"))
+    print('{:<100}'.format("6. Result is saved to folder >>tables<<"))
     print(line)
 
     url = input('Insert link: ')
@@ -354,11 +354,10 @@ def csv_writer(file_name):
             for row in result_election:
                 writer.writerow(row)
 
-            path = os.getcwd() + os.sep + file_name
             print('You are lucky! Data available here:')
-            print('=' * 80)
-            print(path)
-            print('=' * 80)
+            print('=' * 100)
+            print(path + os.sep + file_name)
+            print('=' * 100)
     except IOError:
         print("I/O error")
     return
