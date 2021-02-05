@@ -37,6 +37,7 @@ def welcome_to_scraper():
     print('{:<80}'.format('4. Copy this link'))
     print('{:<80}'.format('5. Prepare file name for result saving in csv '
                           'format'))
+    print('{:<80}'.format("6. Result is saved to folder >>tables<<"))
     print(line)
 
     url = input('Insert link: ')
