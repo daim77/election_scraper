@@ -11,10 +11,8 @@
 # registered, envelopes, valid, all_parties
 
 import csv
-import os
 import requests
 from bs4 import BeautifulSoup
-# TODO import os a pouzit os.sep
 
 
 result_election_frame = {}
@@ -24,8 +22,36 @@ translate = {}
 translate_six = {}
 
 
+def welcome_to_scraper():
+    line = '*' * 100
+
+    print(line)
+    print('{:^100}'.format(
+        'WELCOME TO ELECTION SCRAPER of CHAMBER OF DEPUTIES in Czech Republic'
+    ))
+    print('{:^100}'.format('1996 - 2017'))
+    print(line)
+    print('{:<100}'.format('1. Jdi na https://volby.cz a vyber rok'))
+    print('{:<100}'.format(
+        "2. Klikni na 'Výsledky hlasování za územní celky'"
+    ))
+    print('{:<100}'.format("3. Klikni na X ve sloupci 'Výběr obce'"))
+    print('{:<100}'.format('4. Tento link zkopíruj'))
+    print('{:<100}'.format(
+        '5. Připrav si jméno souboru kam se uloží výsledky'
+    ))
+    print(line)
+
+    input('Vloz link z volby.cz: ')
+    input('vloz jmeno souboru: ')
+
+    print(line)
+    print('stahuji data...')
+    return
+
+
 def election_year(url):
-    year = int(url.split(os.sep)[4][2:].replace('nss', ''))
+    year = int(url.split('/')[4][2:].replace('nss', ''))
     return year
 
 
@@ -65,11 +91,11 @@ def region_name(soup, year):
 
 def list_of_candidates(url, year):
     global translate, translate_six
-    url_part = url.split(os.sep)[2:][:-1]
+    url_part = url.split('/')[2:][:-1]
     if year >= 2006:
         soup_candidates = soup_boiling(
-            'https:' + os.sep + os.sep
-            + '/'.join(url_part) + os.sep
+            'https:' + '/' * 2
+            + '/'.join(url_part) + '/'
             + 'ps82?xjazyk=CZ'
         )
 
@@ -84,7 +110,9 @@ def list_of_candidates(url, year):
 
     elif year == 2002:
         soup_candidates = soup_boiling(
-            'https://' + '/'.join(url_part) + os.sep + 'ps72?xjazyk=CZ'
+            'https:' + '/' * 2
+            + '/'.join(url_part) + '/'
+            + 'ps72?xjazyk=CZ'
         )
         parties = [item.text
                    for index, item in
@@ -93,7 +121,9 @@ def list_of_candidates(url, year):
 
     else:
         soup_candidates = soup_boiling(
-            'https://' + '/'.join(url_part) + '/' + 'u32?xpl=0&xtr=2'
+            'https:' + '/' * 2
+            + '/'.join(url_part) + '/'
+            + 'u32?xpl=0&xtr=2'
         )
 
         parties = [str(100 + int(index / 12))[1:] + ':' + item.text
@@ -157,9 +187,9 @@ def id_municipality_scraper(links, url_part):
         result_election[index]['city_number'] = item[0]
         result_election[index]['city_name'] = item[1]
 
-        url = 'https:' + os.sep + os.sep \
+        url = 'https:' + '/' + '/' \
               + '/'.join(url_part) \
-              + os.sep + item[2]
+              + '/' + item[2]
 
         result_election[index]['links'] = [url]
         result_election[index].update(result_election_frame)
@@ -275,9 +305,9 @@ def ward_link_scraper(url_for_wards):
     for item in ward_soup.table.find_all('td'):
         try:
             ward_links.append(
-                'https:' + os.sep + os.sep
+                'https:' + '/' + '/'
                 + '/'.join(url_part)
-                + os.sep + item.a.attrs['href']
+                + '/' + item.a.attrs['href']
             )
         except AttributeError:
             continue
@@ -306,17 +336,18 @@ def csv_writer(file_name):
 
 # main()
 def chamber_of_deputies(url, file_name):
+    # TODO info pro uzivatele
     # TODO vstup uzivatele: link na seznam obci daneho okresu a jmeno souboru
     # TODO script vytvori slozku ve stejnem adresari jako je script
     #  a ulozi tam csv soubor
+    # TODO nejede to anglicky - v linku je en a ne cz
+    welcome_to_scraper()
     year = election_year(url)
     soup = soup_boiling(url)
     region_name(soup, year)
     list_of_candidates(url, year)
     link_municipality_scraper(soup, url, year)
-
     data_municipality_scraper(year)
-
     csv_writer(file_name)
 
 
