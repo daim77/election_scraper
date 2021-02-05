@@ -202,10 +202,12 @@ def data_municipality_scraper(year):
 
                 for index, item_ in enumerate(figures):
                     if (index + 1) % 5 == 0:
-
-                        value = int(figures[index - 2].replace(' ', ''))
-                        key = figures[index - 4]
-                        item[translate_six[key]] += value
+                        if figures[index - 2].replace(' ', '').isnumeric():
+                            value = int(figures[index - 2].replace(' ', ''))
+                            key = figures[index - 4]
+                            item[translate_six[key]] += value
+                        else:
+                            continue
 
     elif year == 2002:
         for item in result_election:
@@ -294,7 +296,7 @@ def csv_writer(file_name):
                 writer.writerow(row)
     except IOError:
         print("I/O error")
-
+    return
 
 # main()
 def scrap_elect(url, file_name):
@@ -313,14 +315,19 @@ def scrap_elect(url, file_name):
 
 
 if __name__ == '__main__':
+    scrap_elect(
+        'https://volby.cz/pls/ps2010/ps32?xjazyk=CZ&xkraj=7&xnumnuts=5103',
+        'election_data_2010_liberec'
+    )
+    #
     # scrap_elect(
     #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
     #     'election_data_2017'
     # )
-    scrap_elect(
-        'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103',
-        'election_data_2017_JH'
-    )
+    # scrap_elect(
+    #     'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103',
+    #     'election_data_2017_JH'
+    # )
 
     # scrap_elect(
     #     'https://volby.cz/pls/ps2013/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
