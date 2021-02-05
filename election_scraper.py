@@ -50,7 +50,7 @@ def welcome_to_scraper():
             exit()
 
     print(line)
-    print('stahuji data...')
+    print('Loading data...')
 
     return url, file_name
 
@@ -85,10 +85,14 @@ def region_name(soup, year):
         ]
 
     result_election_frame['region'] = region[0][0]
-    if len(region[1]) == 1:
-        result_election_frame['district'] = region[1][0]
+
+    if len(region) > 1:
+        if len(region[1]) == 1:
+            result_election_frame['district'] = region[1][0]
+        else:
+            result_election_frame['district'] = ' '.join(region[1])
     else:
-        result_election_frame['district'] = ' '.join(region[1])
+        result_election_frame['district'] = region[0][0]
 
     header_names.append('region')
     header_names.append('district')
@@ -103,6 +107,7 @@ def list_of_candidates(url, year):
         mutation = 'CZ'
 
     url_part = url.split('/')[2:][:-1]
+
     if year >= 2006:
         soup_candidates = soup_boiling(
             'https:' + '/' * 2
@@ -110,10 +115,11 @@ def list_of_candidates(url, year):
             + 'ps82?xjazyk=' + mutation
         )
 
-        parties = [item.text
-                   for index, item in
-                   enumerate(soup_candidates.table.find_all('td'))
-                   if (index + 1) % 3 == 0]
+        parties = [
+            item.text
+            for item in
+            soup_candidates.table.find_all('td', {'headers': 'sa1 sb2'})
+        ]
 
         order = [str(num) for num in range(1, len(parties) + 1)]
 
