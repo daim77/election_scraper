@@ -29,15 +29,18 @@ def welcome_to_scraper():
     print('{:^100}'.format('1996 - 2017'))
     print(line)
     print('{:<100}'.format('More years available in czech version'))
-    print('{:<100}'.format('1. Open https://volby.cz/index_en.htm and select '
-                          'year'))
-    print('{:<100}'.format("2. Click on 'Results for territorial units'"))
-    print('{:<100}'.format("3. Click on 'X' in a column 'Choice of "
-                          "municipality'"))
-    print('{:<100}'.format('4. Copy this link'))
-    print('{:<100}'.format('5. Prepare file name for result saving in csv '
-                          'format'))
-    print('{:<100}'.format("6. Result is saved to folder >>tables<<"))
+    print('{:<100}'.format(
+        '1. Open https://volby.cz/index_en.htm and select year'))
+    print('{:<100}'.format(
+        "2. Click on 'Results for territorial units'"))
+    print('{:<100}'.format(
+        "3. Click on 'X' in a column 'Choice of municipality'"))
+    print('{:<100}'.format(
+        '4. Copy this link'))
+    print('{:<100}'.format(
+        '5. Prepare file name for result saving in csv format'))
+    print('{:<100}'.format(
+        "6. Result is saved to folder >>tables<<"))
     print(line)
 
     url = input('Insert link: ')

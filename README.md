@@ -12,5 +12,3 @@ Elections to the Chamber of Deputies of the Parliament of the Czech Republic
 Available for CZ and EN version
 
 EN version available from 2002
-
-Different input for Prague in 1996 and 1998 due to data structure on web.
