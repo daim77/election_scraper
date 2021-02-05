@@ -46,6 +46,9 @@ def welcome_to_scraper():
     url = input('Insert link: ')
     file_name = input('Insert file name: ')
 
+    if url.startswith('www'):
+        url = 'https:' + os.sep * 2 + url
+
     not_valid_char = string.punctuation.replace('-', '').replace('_', '')
 
     for char in not_valid_char:
