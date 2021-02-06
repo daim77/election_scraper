@@ -55,6 +55,8 @@ def welcome_to_scraper():
         if char in file_name:
             print('Illegal characters in file name!')
             exit()
+    if file_name == '':
+        file_name = 'election'
 
     print(line)
     print('Loading data...')
