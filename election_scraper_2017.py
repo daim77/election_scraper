@@ -17,25 +17,6 @@ def soup_boiling(url):
     return soup
 
 
-def region_name(soup):
-    region = [
-        item.text.strip('\n').split(':')[1:] for item in soup.find_all('h3')
-    ]
-
-    result_election_frame['region'] = region[0][0]
-
-    if len(region) > 1:
-        if len(region[1]) == 1:
-            result_election_frame['district'] = region[1][0]
-        else:
-            result_election_frame['district'] = ' '.join(region[1])
-    else:
-        result_election_frame['district'] = region[0][0]
-
-    header_names.append('region')
-    header_names.append('district')
-
-
 def list_of_candidates(url):
     global translate, translate_six
 
@@ -200,7 +181,6 @@ def csv_writer(file_name):
 def chamber_of_deputies(url, file_name):
     try:
         soup = soup_boiling(url)
-        region_name(soup)
         list_of_candidates(url)
         link_municipality_scraper(soup, url)
         data_municipality_scraper()
