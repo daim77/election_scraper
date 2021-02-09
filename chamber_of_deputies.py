@@ -16,4 +16,7 @@ def main(url, file_name):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    try:
+        main(sys.argv[1], sys.argv[2])
+    except IndexError:
+        print('wrong arguments')
