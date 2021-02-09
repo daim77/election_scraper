@@ -23,7 +23,7 @@ copy this link as url arg
 arg1 = url
 arg2 = file name
 
-** election_scraper_2017(url, file_name) **
+**election_scraper_2017(url, file_name)**
 
 ## result in file_name.csv in "table" subfolder:
 ```
