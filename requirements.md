@@ -22,7 +22,7 @@ $ git clone git@github.com:daim77/election_scraper.git'
 
 ## run script:
   arg1 = url\
-  arg2 = file name\
+  arg2 = file name
 
   **election_scraper_2017(url, file_name)**
 
