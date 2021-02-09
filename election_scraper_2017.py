@@ -17,7 +17,7 @@ def soup_boiling(url):
 
 
 def list_of_candidates(url):
-    global translate, translate_six
+    global translate_six
 
     url_part = url.split('/')[2:][:-1]
 
@@ -30,7 +30,7 @@ def list_of_candidates(url):
     parties = [
         item.text
         for item in
-        soup_candidates.table.find_all('td', {'headers': 'sa1 sb2'})
+        soup_candidates.find_all('td', {'headers': 'sa1 sb2'})
     ]
 
     order = [str(num) for num in range(1, len(parties) + 1)]
@@ -136,7 +136,7 @@ def ward_link_scraper(url_for_wards):
     url_part = url_for_wards.split('/')[2:][:-1]
     ward_links = []
 
-    for item in ward_soup.table.find_all('td'):
+    for item in ward_soup.find_all('td'):
         try:
             ward_links.append(
                 'https:' + '/' + '/'
@@ -149,8 +149,11 @@ def ward_link_scraper(url_for_wards):
 
 
 def csv_writer(file_name):
+    if len(result_election) == 0:
+        raise Exception('Wrong link!')
 
     path = os.getcwd() + os.sep + 'tables'
+
     if not os.path.exists(path):
         os.mkdir(path)
 
@@ -194,6 +197,6 @@ def chamber_of_deputies(url, file_name):
 
 if __name__ == '__main__':
     chamber_of_deputies(
-        'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
+        'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=211r1',
         'vysledek'
     )
