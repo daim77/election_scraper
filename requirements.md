@@ -1,7 +1,10 @@
 # ELECTION SCRAPER - CHAMBER OF DEPUTIES of CZECH REPUBLIC
 
 ## moduls:
-CSV, REQUESTS, OS, BeautifullSoup (BS4)
+- CSV
+- REQUESTS
+- OS
+- BeautifullSoup (BS4)
 
 ## How to install BS4:
 (https://pypi.org/project/bs4/)
