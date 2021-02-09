@@ -197,6 +197,6 @@ def chamber_of_deputies(url, file_name):
 
 if __name__ == '__main__':
     chamber_of_deputies(
-        'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2111',
+        'https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=3&xnumnuts=3103',
         'vysledek'
     )
