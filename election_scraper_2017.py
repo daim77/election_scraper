@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 result_election_frame = {}
 result_election = []
 header_names = []
-translate = {}
 translate_six = {}
 
 
@@ -49,7 +48,10 @@ def link_municipality_scraper(soup, url):
     url_part = url.split('/')[2:][:-1]
 
     for index, item in enumerate(
-            [field for field in soup.find_all('td') if field.text != '']):
+            [
+                field for field in soup.find_all('td') if field.text != ''
+            ]
+    ):
         if (index + 1) % 3 == 0:
             try:
                 sub_links.append(item.a.attrs['href'])
@@ -77,8 +79,8 @@ def id_municipality_scraper(links, url_part):
         result_election[index]['links'] = [url]
         result_election[index].update(result_election_frame)
 
-    header_names.insert(2, 'city_number')
-    header_names.insert(3, 'city_name')
+    header_names.insert(0, 'city_number')
+    header_names.insert(1, 'city_name')
 
 
 def data_municipality_scraper():
@@ -124,9 +126,9 @@ def data_municipality_scraper():
                     else:
                         continue
 
-    header_names.insert(4, 'registered')
-    header_names.insert(5, 'envelope')
-    header_names.insert(6, 'valid')
+    header_names.insert(2, 'registered')
+    header_names.insert(3, 'envelope')
+    header_names.insert(4, 'valid')
 
 
 def ward_link_scraper(url_for_wards):
