@@ -341,6 +341,9 @@ def ward_link_scraper(url_for_wards):
 
 def csv_writer(file_name):
 
+    if len(result_election) == 0:
+        raise Exception('Wrong link!')
+
     path = os.getcwd() + os.sep + 'tables'
     if not os.path.exists(path):
         os.mkdir(path)
