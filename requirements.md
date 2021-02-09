@@ -7,16 +7,16 @@
 - BeautifullSoup (BS4)
 
 ## How to install BS4:
-(https://pypi.org/project/bs4/)
+https://pypi.org/project/bs4/
 
 ## clone repo from GitHub:
 ```
 $ git clone git@github.com:daim77/election_scraper.git'
-``
+```
 
 ## prepare args:
 open https://volby.cz/pls/ps2017nss/ps3?xjazyk=CZ
-for chosen district open > X < in "vyber obce"column
+for chosen district open ** X ** in "vyber obce"column
 copy this link as url arg
 
 ## run script:
