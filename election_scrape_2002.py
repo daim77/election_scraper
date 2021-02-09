@@ -1,7 +1,6 @@
 import csv
 import requests
 import os
-import string
 from bs4 import BeautifulSoup
 
 
@@ -12,56 +11,6 @@ translate = {}
 translate_six = {}
 
 
-def welcome_to_scraper():
-    line = '*' * 100
-    print()
-    print(line)
-    print('{:^100}'.format(
-        'ELECTION SCRAPER - CHAMBER OF DEPUTIES of CZECH REPUBLIC'
-    ))
-    print('{:^100}'.format('1996 - 2017'))
-    print(line)
-    print('{:<100}'.format('More years available in czech version'))
-    print('{:<100}'.format(
-        '1. Open https://volby.cz/index_en.htm and select year'))
-    print('{:<100}'.format(
-        "2. Click on 'Results for territorial units'"))
-    print('{:<100}'.format(
-        "3. Click on 'X' in a column 'Choice of municipality'"))
-    print('{:<100}'.format(
-        '4. Copy this link'))
-    print('{:<100}'.format(
-        '5. Prepare file name for result saving in csv format'))
-    print('{:<100}'.format(
-        "6. Result is saved to folder >>tables<<"))
-    print(line)
-
-    url = input('Insert link: ')
-    file_name = input('Insert file name: ')
-
-    if url.startswith('www'):
-        url = 'https:' + os.sep * 2 + url
-
-    not_valid_char = string.punctuation.replace('-', '').replace('_', '')
-
-    for char in not_valid_char:
-        if char in file_name:
-            print('Illegal characters in file name!')
-            exit()
-    if file_name == '':
-        file_name = 'election'
-
-    print(line)
-    print('Loading data...')
-
-    return url, file_name
-
-
-def election_year(url):
-    year = int(url.split('/')[4][2:].replace('nss', ''))
-    return year
-
-
 def soup_boiling(url):
     html_data = requests.get(url)
     soup = BeautifulSoup(html_data.text, "html.parser")
@@ -69,7 +18,7 @@ def soup_boiling(url):
 
 
 # region name, district name
-def region_name(soup, year):
+def region_name(soup):
 
     region = [
         item.text.replace(' ', '').split(':')[1:]
@@ -90,7 +39,7 @@ def region_name(soup, year):
     header_names.append('district')
 
 
-def list_of_candidates(url, year):
+def list_of_candidates(url):
     global translate, translate_six
 
     if 'jazyk=EN' in url:
@@ -115,7 +64,7 @@ def list_of_candidates(url, year):
         header_names.append(member)
 
 
-def link_municipality_scraper(soup, url, year):
+def link_municipality_scraper(soup, url):
     sub_links = []
     links = []
     url_part = url.split('/')[2:][:-1]
@@ -153,7 +102,7 @@ def id_municipality_scraper(links, url_part):
     header_names.insert(3, 'city_name')
 
 
-def data_municipality_scraper(year):
+def data_municipality_scraper():
 
     for item in result_election:
         if '&xokrsek=' not in item['links'][0]:
@@ -241,16 +190,13 @@ def csv_writer(file_name):
     return
 
 
-def chamber_of_deputies():
+def chamber_of_deputies(url, file_name):
     try:
-        url, file_name = welcome_to_scraper()
-
-        year = election_year(url)
         soup = soup_boiling(url)
-        region_name(soup, year)
-        list_of_candidates(url, year)
-        link_municipality_scraper(soup, url, year)
-        data_municipality_scraper(year)
+        region_name(soup)
+        list_of_candidates(url)
+        link_municipality_scraper(soup, url)
+        data_municipality_scraper()
         csv_writer(file_name)
 
     except (ValueError, IndexError, TypeError, AttributeError):
@@ -258,4 +204,7 @@ def chamber_of_deputies():
 
 
 if __name__ == '__main__':
-    chamber_of_deputies()
+    chamber_of_deputies(
+        'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=5&xokres=4103',
+        'vysledky'
+    )
