@@ -206,7 +206,7 @@ def csv_writer(file_name):
     return
 
 
-def chamber_of_deputies(url, file_name):
+def main(url, file_name):
     try:
         soup = soup_boiling(url)
         region_name(soup)
@@ -220,7 +220,7 @@ def chamber_of_deputies(url, file_name):
 
 
 if __name__ == '__main__':
-    chamber_of_deputies(
+    main(
         'https://volby.cz/pls/ps2010/ps32?xjazyk=CZ&xkraj=6&xnumnuts=4204',
-        'vysledky'
+        'vysledky_2006'
     )
