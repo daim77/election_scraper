@@ -16,13 +16,13 @@ $ git clone git@github.com:daim77/election_scraper.git'
 ```
 
 ## prepare args:
-  open https://volby.cz/pls/ps2017nss/ps3?xjazyk=CZ
-  for chosen district open ** X ** in "vyber obce"column
+  open https://volby.cz/pls/ps2017nss/ps3?xjazyk=CZ \n
+  for chosen district open ** X ** in "vyber obce"column \n
   copy this link as url arg
 
 ## run script:
-  arg1 = url
-  arg2 = file name
+  arg1 = url \n
+  arg2 = file name \n
 
   **election_scraper_2017(url, file_name)**
 
