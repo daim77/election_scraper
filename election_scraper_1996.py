@@ -42,11 +42,6 @@ def region_name(soup):
 def list_of_candidates(url):
     global translate, translate_six
 
-    if 'jazyk=EN' in url:
-        mutation = 'EN'
-    else:
-        mutation = 'CZ'
-
     url_part = url.split('/')[2:][:-1]
 
     soup_candidates = soup_boiling(
