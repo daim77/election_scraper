@@ -54,8 +54,10 @@ $ python chamber_of_deputies.py 'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkra
 
 ### result is available as results_2002.csv table in TABLE subfolder
 ```
-city_number,city_name,registered,envelope,valid,ODS,ŘN - VU,CESTA,ČSSD,PB,RČ,STAN,KSČM,Zelení,Rozumní,SPDV,Svobodní,BPI,ODA,Piráti,OBČANÉ 2011,Unie H.A.V.E.L.,ČNF,Referendum o EU,TOP 09,ANO,DV 2016,SPRRSČ M.Sládka,KDU-ČSL,ČSNS,REAL,SPORTOVCI,DSSS,SPD,SPO,NáS
-562726,Báňovice,90,71,71,9,0,0,2,0,0,1,0,0,1,0,0,0,0,4,0,0,0,0,5,11,0,0,33,0,0,0,0,5,0,0
-562548,Bednárec,87,47,47,8,0,0,8,0,0,3,0,1,0,0,0,0,0,9,0,0,0,0,0,14,0,0,3,0,0,0,1,0,0,0
-561053,Bednáreček,156,101,99,9,0,0,8,0,0,1,13,2,3,0,2,0,0,4,0,0,0,0,5,34,0,0,4,0,0,1,1,12,0,0
+region,district,city_number,city_name,registered,envelope,valid,Občané,LIB,JežíšPán,VV,KONS,KSČM,"""KČ""",ČSNS,ČSSD,NP,SPR-RSČ,M,SPOZ,STOP,TOP 09,ES,KDU-ČSL,PB,ČSNS2005,SZ,Suveren.,HS,ČPS,DSSS,Svobodní,ODS,KH
+ Plzeňský kraj, Plzeň-sever,566756,Bdeněves,475,310,308,0,0,0,29,0,40,0,0,41,0,0,0,17,0,62,0,7,0,0,4,21,0,1,9,1,76,0
+ Plzeňský kraj, Plzeň-sever,558656,Bezvěrov,544,275,274,0,0,0,34,0,69,0,0,56,0,0,0,5,0,20,0,4,1,0,1,20,0,6,5,3,50,0
+ Plzeňský kraj, Plzeň-sever,530239,Bílov,64,46,46,0,0,0,3,0,10,0,0,11,0,0,0,1,0,6,0,2,0,0,0,1,0,1,0,1,10,0
+ Plzeňský kraj, Plzeň-sever,558672,Blatnice,615,342,341,0,0,0,47,0,49,0,0,94,0,0,0,11,1,40,0,5,2,1,1,8,0,8,6,3,65,0
+ Plzeňský kraj, Plzeň-sever,566764,Blažim,46,31,31,0,0,0,2,0,8,0,0,11,0,0,0,1,0,0,0,0,0,0,0,2,0,1,0,0,6,0
 ```
