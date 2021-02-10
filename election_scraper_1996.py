@@ -8,7 +8,6 @@ result_election_frame = {}
 result_election = []
 header_names = []
 translate = {}
-translate_six = {}
 
 
 def soup_boiling(url):
@@ -40,7 +39,7 @@ def region_name(soup):
 
 
 def list_of_candidates(url):
-    global translate, translate_six
+    global translate
 
     url_part = url.split('/')[2:][:-1]
 

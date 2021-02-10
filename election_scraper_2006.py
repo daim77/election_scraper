@@ -8,7 +8,6 @@ result_election_frame = {}
 result_election = []
 header_names = []
 translate = {}
-translate_six = {}
 
 
 def soup_boiling(url):
@@ -39,7 +38,7 @@ def region_name(soup):
 
 
 def list_of_candidates(url):
-    global translate, translate_six
+    global translate
 
     if 'jazyk=EN' in url:
         mutation = 'EN'
@@ -62,7 +61,7 @@ def list_of_candidates(url):
 
     order = [str(num) for num in range(1, len(parties) + 1)]
 
-    translate_six = dict(zip(order, parties))
+    translate = dict(zip(order, parties))
 
     for member in parties:
         result_election_frame[member] = 0
@@ -145,7 +144,7 @@ def data_municipality_scraper():
                     if figures[index - 2].replace(' ', '').isnumeric():
                         value = int(figures[index - 2].replace(' ', ''))
                         key = figures[index - 4]
-                        item[translate_six[key]] += value
+                        item[translate[key]] += value
                     else:
                         continue
 
