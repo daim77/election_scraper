@@ -46,7 +46,7 @@ $ git clone git@github.com:daim77/election_scraper.git'
   copy this link as *url arg*
 
 ### how to run 2nd possibility
-open terminal
+open terminal  
 write:  
 ```
 $ python chamber_of_deputies.py 'https://volby.cz/pls/ps2002/ps45?xjazyk=CZ&xkraj=5&xokres=4103', 'results_2002'
