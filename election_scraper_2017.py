@@ -12,9 +12,7 @@ translate = {}
 
 
 def soup_boiling(url):
-    html_data = requests.get(url)
-    soup = BeautifulSoup(html_data.text, "html.parser")
-    return soup
+    return BeautifulSoup(requests.get(url).text, "html.parser")
 
 
 def list_of_candidates(url):
@@ -34,9 +32,7 @@ def list_of_candidates(url):
         soup_candidates.find_all('td', {'headers': 'sa1 sb2'})
     ]
 
-    order = [str(num) for num in range(1, len(parties) + 1)]
-
-    translate = dict(zip(order, parties))
+    translate = {str(index): value for index, value in enumerate(parties, 1)}
 
     for member in parties:
         result_election_frame[member] = 0
@@ -73,7 +69,9 @@ def id_municipality_scraper(links, url_part):
         result_election[index]['city_number'] = item[0]
         result_election[index]['city_name'] = item[1]
 
-        url = 'https:' + '/' + '/' \
+        url = 'https:' \
+              + '/' \
+              + '/' \
               + '/'.join(url_part) \
               + '/' + item[2]
 
@@ -140,7 +138,9 @@ def ward_link_scraper(url_for_wards):
     for item in ward_soup.find_all('td'):
         try:
             ward_links.append(
-                'https:' + '/' + '/'
+                'https:'
+                + '/'
+                + '/'
                 + '/'.join(url_part)
                 + '/' + item.a.attrs['href']
             )
@@ -172,8 +172,7 @@ def csv_writer(file_name):
             )
 
             writer.writeheader()
-            for row in result_election:
-                writer.writerow(row)
+            writer.writerows(result_election)
 
             print('You are lucky! Data available here:')
             print('=' * 100)
@@ -181,7 +180,6 @@ def csv_writer(file_name):
             print('=' * 100)
     except IOError:
         print("I/O error")
-    return
 
 
 def chamber_of_deputies(url, file_name):
